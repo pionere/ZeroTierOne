@@ -77,7 +77,7 @@ public:
 	// Not available on *nix platforms
 	static inline void cancelIO(const Thread &t)
 	{
-#if !defined(__MINGW32__) && !defined(__MINGW64__) // CancelSynchronousIo not available in MSYS2
+#if !defined(__MINGW32__) && !defined(__MINGW64__) && (!defined(_WIN32_WINNT) || _WIN32_WINNT >= 0x0600) // CancelSynchronousIo not available in MSYS2 and on Windows before Vista
 		if (t._th != NULL)
 			CancelSynchronousIo(t._th);
 #endif
