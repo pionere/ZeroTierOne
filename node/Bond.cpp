@@ -569,7 +569,7 @@ bool Bond::assignFlowToBondedPath(SharedPtr<Flow>& flow, int64_t now)
 	}
 	_paths[flow->assignedPath].p->address().toString(curPathStr);
 	SharedPtr<Link> link = RR->bc->getLinkBySocket(_policyAlias, _paths[flow->assignedPath].p->localSocket());
-	log("assign out-flow %x to link %s/%s (%lu / %lu flows)", flow->id, link->ifname().c_str(), curPathStr, _paths[flow->assignedPath].assignedFlowCount, (unsigned long)_flows.size());
+	log("assign out-flow %x to link %s/%s (%6d / %lu flows)", flow->id, link->ifname().c_str(), curPathStr, _paths[flow->assignedPath].assignedFlowCount, (unsigned long)_flows.size());
 	return true;
 }
 
@@ -596,7 +596,7 @@ SharedPtr<Bond::Flow> Bond::createFlow(int pathIdx, int32_t flowId, unsigned cha
 		_paths[pathIdx].p->address().toString(curPathStr);
 		_paths[pathIdx].assignedFlowCount++;
 		SharedPtr<Link> link = RR->bc->getLinkBySocket(_policyAlias, _paths[flow->assignedPath].p->localSocket());
-		log("assign in-flow %x to link %s/%s (%lu / %lu)", flow->id, link->ifname().c_str(), curPathStr, _paths[pathIdx].assignedFlowCount, (unsigned long)_flows.size());
+		log("assign in-flow %x to link %s/%s (%6d / %lu)", flow->id, link->ifname().c_str(), curPathStr, _paths[pathIdx].assignedFlowCount, (unsigned long)_flows.size());
 	}
 	/**
 	 * Add a flow when no path was provided. This means that it is an outgoing packet
@@ -616,7 +616,7 @@ void Bond::forgetFlowsWhenNecessary(uint64_t age, bool oldest, int64_t now)
 	if (age) {	 // Remove by specific age
 		while (it != _flows.end()) {
 			if (it->second->age(now) > age) {
-				log("forget flow %x (age %llu) (%lu / %lu)", it->first, (unsigned long long)it->second->age(now), _paths[it->second->assignedPath].assignedFlowCount, (unsigned long)(_flows.size() - 1));
+				log("forget flow %x (age %llu) (%6d / %lu)", it->first, (unsigned long long)it->second->age(now), _paths[it->second->assignedPath].assignedFlowCount, (unsigned long)(_flows.size() - 1));
 				_paths[it->second->assignedPath].assignedFlowCount--;
 				it = _flows.erase(it);
 			}
@@ -1755,7 +1755,7 @@ void Bond::dumpPathStatus(int64_t now, int pathIdx)
 {
 	char pathStr[64] = { 0 };
 	_paths[pathIdx].p->address().toString(pathStr);
-	log("path status: [%2d] alive:%d, eli:%d, bonded:%d, flows:%6d, lat:%10.3f, jitter:%10.3f, error:%6.4f, loss:%6.4f, age:%6d alloc:%d--- (%s/%s)",
+	log("path status: [%2d] alive:%d, eli:%d, bonded:%d, flows:%6d, lat:%10.3f, jitter:%10.3f, error:%6.4f, loss:%6.4f, age:%llu alloc:%d--- (%s/%s)",
 		pathIdx,
 		_paths[pathIdx].alive,
 		_paths[pathIdx].eligible,
@@ -1765,7 +1765,7 @@ void Bond::dumpPathStatus(int64_t now, int pathIdx)
 		_paths[pathIdx].latencyVariance,
 		_paths[pathIdx].packetErrorRatio,
 		_paths[pathIdx].packetLossRatio,
-		_paths[pathIdx].p->age(now),
+		(unsigned long long)_paths[pathIdx].p->age(now),
 		_paths[pathIdx].allocation,
 		getLink(_paths[pathIdx].p)->ifname().c_str(),
 		pathStr);
